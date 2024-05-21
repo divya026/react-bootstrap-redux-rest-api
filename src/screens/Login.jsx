@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { baseURL } from "../config/constant";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [mail, setMail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const sighUpcall = async () => {
     // setLoading(true);
     try {
       const res = await axios.post(
         `${baseURL}/users`,
         {
-          //   name: fname + " " + lname,
           mail: mail,
           password: password,
-          //   contact: contact,
         },
         {
           headers: {
@@ -25,6 +25,25 @@ const Login = () => {
       );
       setLoading(false);
       console.log("res----------", res.data);
+
+      //Assume user has successfully authenticated(logged in)
+      //fetch the details of authenticated user, In our case assume userId 1 is authenticated
+
+      const authenticate = async () => {
+        try {
+          const userId = 1;
+          const res = await axios.get(`${baseURL}/users/${userId}`);
+          console.log("UserId 1 information", res.data);
+          localStorage.setItem("users", JSON.stringify(res.data));
+          localStorage.setItem("token", "jhdhgghdsvfgcfcbvfghjjhg");
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      authenticate();
+      if (res.status == 201) {
+        navigate("/posts");
+      }
     } catch (err) {
       console.log(err);
     }
@@ -44,7 +63,7 @@ const Login = () => {
     <div className="container">
       <h3 className="text-center text-uppercase p-2">Log In to your Account</h3>
       <div className="contact-form-container text-muted shadow p-4 mb-5 bg-body rounded lh-2 mx-auto">
-        <form>
+        <form onSubmit={(event) => apiCall(event)}>
           <div className="mb-3">
             <label htmlFor="exampleInputEmail1" className="form-label">
               Email address
@@ -55,6 +74,8 @@ const Login = () => {
               id="exampleInputEmail1"
               aria-describedby="emailHelp"
               required
+              value={mail}
+              onChange={(e) => setMail(e.target.value)}
             />
             <label id="emailHelp" className="form-text">
               We'll never share your email with anyone else.
@@ -65,11 +86,13 @@ const Login = () => {
               Password
             </label>
             <input
-              type="email"
+              type="password"
               className="form-control"
               id="password"
               aria-describedby="passwordHelp"
               required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
